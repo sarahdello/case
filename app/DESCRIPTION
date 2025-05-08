@@ -1,0 +1,19 @@
+Package: N/A
+Title: Stryker Case Study
+Version: 1
+Description: Stryker sales dashboard
+Depends: 
+    R (>= 4.2)
+Imports: 
+  shiny,
+  bslib,
+  shinyjs,
+  readxl,
+  jsonlite,
+  dplyr,
+  tidyr,
+  reactable,
+  echarts4r
+Encoding: UTF-8
+Language: en-US
+LazyData: true
