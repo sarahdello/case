@@ -17,12 +17,21 @@ namespace WinFormsApp1
         {
             InitializeComponent();
 
+            // Initialize filters
+            comboBox1.Items.AddRange(new object[] { "Europe", "North America", "Pacific" });
+            comboBox2.Items.AddRange(new object[] { "Australia", "Canada", "Central", "France", "Germany", "Northeast", "Northwest", "Southeast", "Southwest", "United Kingdom"});
+            comboBox3.Items.AddRange(new object[] { "Accessories", "Bikes", "Clothing", "Components" });
+
+            // Event handlers 
+            comboBox1.SelectedIndexChanged += FilterChanged;
+            comboBox2.SelectedIndexChanged += FilterChanged;
+            comboBox3.SelectedIndexChanged += FilterChanged;
+
             // Initialize DataTable
             dataTable = new DataTable();
             table.DataSource = dataTable;
 
             // Wire up event handlers
-            load.Click += LoadButton_Click;
             addSale.Click += AddButton_Click;
 
             // Auto-load CSV file if it exists
@@ -32,30 +41,20 @@ namespace WinFormsApp1
                 csvFilePath = csvPath;
                 LoadCSVData(csvFilePath);
             }
-        }
 
-        // Event Handlers
-        private void LoadButton_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                using (OpenFileDialog openFileDialog = new OpenFileDialog())
-                {
-                    openFileDialog.Filter = "CSV Files (*.csv)|*.csv|All Files (*.*)|*.*";
-                    openFileDialog.Title = "Select a CSV File";
+            // Hide columns
+            string[] visibleColumns = {
+                "OnlineOrderFlag", "Product", "ProductCategory", "ProductSubCategory",
+                "Region", "SalesOrderID", "ShipDate", "Territory", "TotalDue"
+            };
 
-                    if (openFileDialog.ShowDialog() == DialogResult.OK)
-                    {
-                        csvFilePath = openFileDialog.FileName;
-                        LoadCSVData(csvFilePath);
-                    }
-                }
-            }
-            catch (Exception ex)
+            foreach (DataGridViewColumn col in table.Columns)
             {
-                MessageBox.Show($"Error loading file: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                col.Visible = visibleColumns.Contains(col.Name);
             }
         }
+
+        // Add new sale
         private void AddButton_Click(object sender, EventArgs e)
         {
             if (dataTable.Columns.Count == 0 || dataTable.Rows.Count == 0)
@@ -326,7 +325,50 @@ namespace WinFormsApp1
             }
         }
 
+        private void FilterChanged(object sender, EventArgs e)
+        {
+            ApplyFilters();
+        }
+
+        private void ApplyFilters()
+        {
+            if (dataTable == null || dataTable.Rows.Count == 0)
+                return;
+
+            // Create a DataView from the original DataTable
+            DataView view = new DataView(dataTable);
+
+            // Build filter string
+            var filters = new List<string>();
+
+            if (comboBox1.SelectedItem != null)
+                filters.Add($"Region = '{comboBox1.SelectedItem.ToString().Replace("'", "''")}'");
+
+            if (comboBox2.SelectedItem != null)
+                filters.Add($"Territory = '{comboBox2.SelectedItem.ToString().Replace("'", "''")}'");
+
+            if (comboBox3.SelectedItem != null)
+                filters.Add($"ProductCategory = '{comboBox3.SelectedItem.ToString().Replace("'", "''")}'");
+
+            // Apply filter if any
+            view.RowFilter = string.Join(" AND ", filters);
+
+            // Bind the filtered view to the DataGridView
+            table.DataSource = view;
+        }
+
+
         private void Form1_Load(object sender, EventArgs e)
+        {
+
+        }
+
+        private void label2_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
         {
 
         }
